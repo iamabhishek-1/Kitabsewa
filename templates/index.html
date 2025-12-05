@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>KitabSewa – Books, Notes, MCQs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- TEMP: use ONLY this CSS for testing -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+
+
+
+  <!-- Loading Screen -->
+  <div id="loader">
+    <div class="loader-logo">
+<img src="{% static 'logo.png' %}" alt="KetabSewa Logo">      <h1 class="logo-text">KitabSewa</h1>
+    </div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <!-- Main Wrapper -->
+  <div id="app" class="hidden">
+
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="nav-left">
+<img class="nav-logo" src="{% static 'logo.png' %}" alt="KetabSewa">
+        <span class="nav-title">KitabSewa</span>
+      </div>
+      <nav class="nav-links">
+        <a href="#hero" class="nav-link">Home</a>
+        <a href="#upload" class="nav-link">Upload</a>
+        <a href="#library" class="nav-link">Library</a>
+        <a href="#mcq" class="nav-link">MCQ Test</a>
+        <a href="#payments" class="nav-link">Payments</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero section reveal">
+      <div class="hero-text">
+        <h1>Digital Library<span class="highlight"></span></h1>
+        <p>
+          Upload and access books, PDFs, notes and model questions from
+          <strong>Class 8 to MBBS level</strong>. Practice MCQ tests according to
+          Nepal's academic model and buy or sell resources freely.
+        </p>
+        <div class="hero-actions">
+          <a href="#upload" class="btn primary-btn">Upload Your Notes</a>
+          <a href="#library" class="btn ghost-btn">Browse Library</a>
+        </div>
+        <div class="hero-subtext">
+          Free or paid resources • Cash on Delivery • eSewa • Khalti
+        </div>
+      </div>
+      <div class="hero-illustration">
+        <div class="card-floating">MCQ Score: 92%</div>
+        <div class="card-floating second">+1200 Books Listed</div>
+        <div class="bubble bubble-1"></div>
+        <div class="bubble bubble-2"></div>
+        <div class="bubble bubble-3"></div>
+      </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section id="upload" class="section reveal">
+      <h2 class="section-title">Upload Your Book / Notes</h2>
+      <p class="section-subtitle">Share your knowledge with students across Nepal.</p>
+
+      <form class="upload-form" action="{% url 'upload_book' %}" method="POST">
+        {% csrf_token %}
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Title</label>
+            <input name="title" type="text" required placeholder="e.g. Grade 11 Physics Notes">
+          </div>
+
+          <div class="form-group">
+            <label>Author / Creator</label>
+            <input name="author" type="text" required placeholder="Your name">
+          </div>
+
+          <div class="form-group">
+            <label>Level</label>
+            <select name="grade_level" required>
+              <option value="">Select level</option>
+              <option>Class 8</option>
+              <option>Class 9</option>
+              <option>Class 10</option>
+              <option>+2</option>
+              <option>Engineering</option>
+              <option>MBBS</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Subject</label>
+            <input name="subject" type="text" required placeholder="e.g. Mathematics">
+          </div>
+
+          <div class="form-group">
+            <label>Free or Paid?</label>
+            <select name="price_type" id="price_type" required>
+              <option value="free">Free</option>
+              <option value="paid">Paid</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="price_group">
+            <label>Price (NPR)</label>
+            <input name="price" type="number" min="0" step="10" placeholder="e.g. 150">
+          </div>
+
+          <div class="form-group full-width">
+            <label>File Link (temporary)</label>
+            <input name="file_url" type="url" placeholder="e.g. Google Drive / direct link">
+            <span class="helper-text">Later you can integrate real file upload.</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn primary-btn click-animate">
+          Upload Now
+        </button>
+      </form>
+    </section>
+
+    <!-- Library Section -->
+    <section id="library" class="section reveal">
+      <h2 class="section-title">Latest Books & Notes</h2>
+      <p class="section-subtitle">Fresh uploads from students and teachers.</p>
+
+      <div class="cards-grid">
+        {% if books %}
+          {% for book in books %}
+          <article class="book-card hover-animate">
+            <div class="book-label">{{ book.grade_level }}</div>
+            <h3>{{ book.title }}</h3>
+            <p class="book-meta">{{ book.subject }} • by {{ book.author }}</p>
+            <p class="book-price">
+              {% if book.price_type == 'free' %}
+                Free
+              {% else %}
+                NPR {{ book.price|floatformat:0 }}
+              {% endif %}
+            </p>
+            {% if book.file_url %}
+              <a href="{{ book.file_url }}" target="_blank" class="btn ghost-btn small-btn click-animate">
+                Open Resource
+              </a>
+            {% else %}
+              <button class="btn ghost-btn small-btn click-animate" disabled>
+                No Link
+              </button>
+            {% endif %}
+          </article>
+          {% endfor %}
+        {% else %}
+          <p>No books uploaded yet. Be the first to upload!</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- MCQ Test Section -->
+    <section id="mcq" class="section reveal">
+      <h2 class="section-title">MCQ Practice Test</h2>
+      <p class="section-subtitle">
+        Practice MCQs according to Nepal academic model (demo).
+      </p>
+
+      <div class="mcq-controls">
+        <label>Select Level:</label>
+        <select id="mcq-grade">
+          <option value="class-10">Class 10</option>
+          <option value="plus-two">+2</option>
+          <option value="mbbs">MBBS</option>
+        </select>
+        <button id="mcq-start" class="btn primary-btn click-animate">Start Test</button>
+      </div>
+
+      <div id="mcq-container" class="mcq-container"></div>
+      <div id="mcq-result" class="mcq-result"></div>
+    </section>
+
+    <!-- Payments Section -->
+    <section id="payments" class="section reveal">
+      <h2 class="section-title">Payment Options</h2>
+      <p class="section-subtitle">
+        Choose what works best for you – online or offline.
+      </p>
+
+      <div class="cards-grid payments-grid">
+        <div class="payment-card hover-animate">
+          <h3>Cash on Delivery</h3>
+          <p>Order physical books and pay in cash when they are delivered to you.</p>
+        </div>
+        <div class="payment-card hover-animate">
+          <h3>eSewa</h3>
+          <p>Pay quickly using your eSewa wallet.</p>
+          <div class="payment-logo">
+<img src="{% static 'esewa.png' %}" alt="eSewa">
+          </div>
+        </div>
+        <div class="payment-card hover-animate">
+          <h3>Khalti</h3>
+          <p>Use Khalti for secure and instant payment.</p>
+          <div class="payment-logo">
+<img src="{% static 'khalti.png' %}" alt="Khalti">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section reveal contact-section">
+      <h2 class="section-title">Contact</h2>
+      <p class="section-subtitle">
+        Have a question, issue or suggestion? Reach out anytime.
+      </p>
+
+      <div class="contact-grid">
+        <div class="contact-card">
+          <h3>Phone / WhatsApp</h3>
+          <p class="contact-main">+977 9767579076</p>
+        </div>
+        <div class="contact-card">
+          <h3>Instagram</h3>
+          <p class="contact-main">
+            <span class="ig-logo">📸</span> @iamrohan_6
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>© <span id="year"></span> KetabSewa. All rights reserved.</p>
+    </footer>
+
+  </div> <!-- /#app -->
+
+<script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

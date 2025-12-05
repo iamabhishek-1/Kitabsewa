@@ -1,0 +1,3 @@
+<img src="{% static 'logo.png' %}" alt="KetabSewa">
+<img src="{% static 'esewa.png' %}" alt="eSewa">
+<img src="{% static 'khalti.png' %}" alt="Khalti">
